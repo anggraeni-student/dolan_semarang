@@ -3,77 +3,156 @@
 @section('title', $destination->name . ' - Dolan Semarang')
 
 @section('content')
-    <p><a href="{{ route('wisata.index') }}">&larr; Kembali ke Daftar Wisata</a></p>
+    {{-- Breadcrumb --}}
+    <nav class="text-xs text-gray-400 mb-5 flex items-center gap-2">
+        <a href="{{ route('wisata.index') }}" class="hover:text-rose-600">Home</a>
+        <span>/</span>
+        <a href="{{ route('wisata.index', ['category' => $destination->category]) }}" class="hover:text-rose-600">{{ $destination->category }}</a>
+        <span>/</span>
+        <span class="text-gray-700 font-medium">{{ $destination->name }}</span>
+    </nav>
 
     @if (session('success'))
-        <div class="success" style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 1.25rem;">
+        <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
             {{ session('success') }}
         </div>
     @endif
 
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <h1 style="margin: 0 0 0.5rem;">{{ $destination->name }}</h1>
-            <p style="margin: 0; color: #374151;">
-                <strong>Kategori:</strong> {{ $destination->category }} |
-                <strong>Estimasi Harga:</strong> {{ $destination->price_range }} |
-                <strong>Rating:</strong> ⭐ {{ number_format($destination->reviews->avg('rating') ?? 0, 1) }} ({{ $destination->reviews->count() }} ulasan)
-            </p>
+    {{-- Hero Detail Destinasi --}}
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-10">
+        {{-- Foto Destinasi --}}
+        <div class="md:col-span-5 h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100 border border-gray-100 flex items-center justify-center">
+            @if ($destination->image_url)
+                <img src="{{ $destination->image_url }}" alt="{{ $destination->name }}" class="w-full h-full object-cover">
+            @else
+                <span class="text-6xl">🏞️</span>
+            @endif
         </div>
 
-        <div style="display: flex; gap: 0.5rem;">
-            <a href="{{ route('wisata.edit', $destination) }}" style="padding: 8px 14px; background: #f59e0b; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;">
-                Edit
-            </a>
-            <form method="POST" action="{{ route('wisata.destroy', $destination) }}" onsubmit="return confirm('Yakin ingin menghapus {{ $destination->name }}?');" style="margin: 0;">
+        {{-- Info Utama --}}
+        <div class="md:col-span-7">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <span class="inline-block bg-rose-50 text-rose-600 text-xs font-bold px-3 py-1 rounded-full mb-2">
+                        {{ $destination->category }}
+                    </span>
+                    <h1 class="text-3xl font-extrabold text-gray-900">{{ $destination->name }}</h1>
+                    <p class="text-sm text-gray-500 mt-1">📍 {{ $destination->address ?? 'Semarang, Jawa Tengah' }}</p>
+                </div>
+
+                {{-- Tombol Edit & Hapus --}}
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{{ route('wisata.edit', $destination) }}" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">
+                        Edit
+                    </a>
+                    <form method="POST" action="{{ route('wisata.destroy', $destination) }}" onsubmit="return confirm('Yakin ingin menghapus {{ $destination->name }}?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 transition">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Rating Besar --}}
+            <div class="flex items-center gap-3 mt-4">
+                <span class="text-amber-500 text-2xl font-extrabold">★ {{ number_format($destination->reviews->avg('rating') ?? 0, 1) }}</span>
+                <span class="text-sm text-rose-600 font-semibold underline">{{ $destination->reviews->count() }} review</span>
+                <span class="text-gray-300">|</span>
+                <span class="text-sm font-semibold text-emerald-600">{{ $destination->price_range }}</span>
+            </div>
+
+            <p class="mt-4 text-sm text-gray-600 leading-relaxed">
+                {{ $destination->description }}
+            </p>
+
+            <div class="mt-6 flex items-center gap-4">
+                <a href="#form-review" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-sm transition">
+                    Tulis Review
+                </a>
+                <a href="{{ route('wisata.index') }}" class="text-sm font-semibold text-rose-600 hover:underline">
+                    &larr; Lihat Destinasi Lain
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <hr class="border-gray-100 my-8">
+
+    {{-- Bagian Ulasan & Form --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {{-- Daftar Ulasan (Kiri) --}}
+        <div class="lg:col-span-7">
+            <h2 class="text-lg font-extrabold text-gray-900 mb-5">
+                Review Pengunjung ({{ $destination->reviews->count() }})
+            </h2>
+
+            <div class="space-y-4">
+                @forelse ($destination->reviews as $review)
+                    <div class="p-4 rounded-2xl border border-gray-100 bg-white shadow-sm">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-9 h-9 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                                {{ strtoupper(substr($review->user_name, 0, 2)) }}
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-gray-900">{{ $review->user_name }}</p>
+                                <p class="text-xs text-amber-500 font-semibold">
+                                    {{ str_repeat('★', $review->rating) }}{{ str_repeat('☆', 5 - $review->rating) }}
+                                    <span class="text-gray-400 font-normal ml-1">{{ $review->created_at->diffForHumans() }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 leading-relaxed pl-12">
+                            {{ $review->comment }}
+                        </p>
+                    </div>
+                @empty
+                    <div class="p-8 text-center rounded-2xl border border-dashed border-gray-200 text-sm text-gray-400">
+                        Belum ada ulasan. Jadilah yang pertama membagikan pengalamanmu di sini!
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- Form Tulis Ulasan (Kanan - Pink Lembut) --}}
+        <div id="form-review" class="lg:col-span-5 bg-[#FFF5F7] rounded-2xl p-6 border border-rose-100/70">
+            <h2 class="text-base font-extrabold text-gray-900 mb-4">Bagikan Pengalamanmu</h2>
+
+            <form method="POST" action="{{ route('wisata.review.store', $destination) }}" class="space-y-4">
                 @csrf
-                @method('DELETE')
-                <button type="submit" style="padding: 8px 14px; background: #dc2626; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem;">
-                    Hapus
+
+                <div>
+                    <label for="user_name" class="block text-xs font-bold text-gray-700 mb-1">Nama Kamu</label>
+                    <input id="user_name" name="user_name" value="{{ old('user_name') }}" placeholder="Contoh: Zizi" required
+                           class="w-full bg-white border border-rose-100 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                    @error('user_name') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="rating" class="block text-xs font-bold text-gray-700 mb-1">Rating</label>
+                    <select id="rating" name="rating" required
+                            class="w-full bg-white border border-rose-100 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        <option value="5">★★★★★ (5 - Sangat Bagus)</option>
+                        <option value="4">★★★★☆ (4 - Bagus)</option>
+                        <option value="3">★★★☆☆ (3 - Cukup)</option>
+                        <option value="2">★★☆☆☆ (2 - Kurang)</option>
+                        <option value="1">★☆☆☆☆ (1 - Buruk)</option>
+                    </select>
+                    @error('rating') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="comment" class="block text-xs font-bold text-gray-700 mb-1">Ceritakan Pengalamanmu</label>
+                    <textarea id="comment" name="comment" rows="3" placeholder="Pemandangan, rute, tips, atau harga tiket..." required
+                              class="w-full bg-white border border-rose-100 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30">{{ old('comment') }}</textarea>
+                    @error('comment') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm py-2.5 rounded-xl shadow-sm transition">
+                    Kirim Review
                 </button>
             </form>
         </div>
     </div>
-
-    <p style="margin-top: 1rem;"><strong>Alamat:</strong> {{ $destination->address ?? '-' }}</p>
-    <p style="line-height: 1.6;">{{ $destination->description }}</p>
-
-    <hr style="margin: 2rem 0;">
-
-    <h2>Tulis Ulasan Kamu</h2>
-    <form method="POST" action="{{ route('wisata.review.store', $destination) }}">
-        @csrf
-
-        <label for="user_name">Nama Kamu</label>
-        <input id="user_name" name="user_name" value="{{ old('user_name') }}" placeholder="Contoh: Zizi" required>
-        @error('user_name') <div class="error">{{ $message }}</div> @enderror
-
-        <label for="rating">Rating (1 - 5)</label>
-        <select id="rating" name="rating" required>
-            <option value="5">⭐⭐⭐⭐⭐ (5 - Sangat Bagus)</option>
-            <option value="4">⭐⭐⭐⭐ (4 - Bagus)</option>
-            <option value="3">⭐⭐⭐ (3 - Cukup)</option>
-            <option value="2">⭐⭐ (2 - Kurang)</option>
-            <option value="1">⭐ (1 - Buruk)</option>
-        </select>
-        @error('rating') <div class="error">{{ $message }}</div> @enderror
-
-        <label for="comment">Komentar</label>
-        <textarea id="comment" name="comment" rows="3" placeholder="Bagaimana pengalamanmu di sini?" required>{{ old('comment') }}</textarea>
-        @error('comment') <div class="error">{{ $message }}</div> @enderror
-
-        <button type="submit">Kirim Ulasan</button>
-    </form>
-
-    <hr style="margin: 2rem 0;">
-
-    <h2>Ulasan Pengunjung ({{ $destination->reviews->count() }})</h2>
-    @forelse ($destination->reviews as $review)
-        <div style="border: 1px solid #e5e7eb; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
-            <strong>{{ $review->user_name }}</strong> — ⭐ {{ $review->rating }}/5
-            <p style="margin-top: 0.5rem;">{{ $review->comment }}</p>
-        </div>
-    @empty
-        <p>Belum ada ulasan untuk tempat ini. Jadilah yang pertama mengulas!</p>
-    @endforelse
 @endsection

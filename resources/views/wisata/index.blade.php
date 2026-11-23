@@ -1,102 +1,119 @@
 @extends('layouts.app')
 
-@section('title', 'Daftar Wisata - Dolan Semarang')
+@section('title', 'Dolan Semarang - Direktori Wisata Lokal')
 
 @section('content')
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
-        <div>
-            <h1 style="margin: 0;">Dolan Semarang</h1>
-            <p style="margin: 0.25rem 0 0; color: #555;">Direktori tempat wisata lokal Semarang.</p>
-        </div>
-        <a href="{{ route('wisata.create') }}" style="padding: 10px 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
-            + Tambah Wisata
-        </a>
-    </div>
-
+    {{-- Notifikasi Sukses --}}
     @if (session('success'))
-        <div class="success" style="background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 1.25rem;">
+        <div class="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-medium">
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- Form Pencarian & Filter Kategori --}}
-    <form method="GET" action="{{ route('wisata.index') }}" style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-        <input
-            type="text"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Cari nama wisata..."
-            style="flex: 1; min-width: 200px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;"
-        >
-
-        <select name="category" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
-            <option value="">Semua Kategori</option>
-            @foreach ($categories as $cat)
-                <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>
-                    {{ $cat }}
-                </option>
-            @endforeach
-        </select>
-
-        <button type="submit" style="padding: 8px 16px; background: #111827; color: white; border: none; border-radius: 6px; cursor: pointer;">
-            Cari
-        </button>
-
-        @if (request()->filled('search') || request()->filled('category'))
-            <a href="{{ route('wisata.index') }}" style="padding: 8px 12px; color: #555; text-decoration: none; align-self: center;">
-                Reset
+    {{-- Baris Tab Kategori --}}
+    <div class="flex items-center gap-6 border-b border-gray-100 pb-3 mb-8 overflow-x-auto text-sm">
+        <a href="{{ route('wisata.index') }}"
+           class="whitespace-nowrap pb-1 transition {{ !request('category') ? 'text-rose-600 font-bold border-b-2 border-rose-600' : 'text-gray-500 hover:text-gray-900' }}">
+            Semua
+        </a>
+        @foreach ($categories as $cat)
+            <a href="{{ route('wisata.index', ['category' => $cat, 'search' => request('search')]) }}"
+               class="whitespace-nowrap pb-1 transition {{ request('category') == $cat ? 'text-rose-600 font-bold border-b-2 border-rose-600' : 'text-gray-500 hover:text-gray-900' }}">
+                {{ $cat }}
             </a>
-        @endif
-    </form>
+        @endforeach
+    </div>
 
-    {{-- Card Grid Wisata --}}
-    @if ($destinations->count() > 0)
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem;">
-            @foreach ($destinations as $item)
-                <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <span style="background: #eff6ff; color: #1d4ed8; font-size: 0.8rem; font-weight: bold; padding: 4px 10px; border-radius: 999px;">
-                                {{ $item->category }}
-                            </span>
-                            <span style="font-size: 0.85rem; color: #4b5563;">
-                                ⭐ {{ number_format($item->reviews_avg_rating ?? 0, 1) }} ({{ $item->reviews_count }})
-                            </span>
-                        </div>
+    {{-- Layout 2 Kolom (Kiri: Destinasi, Kanan: Sidebar Pink) --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                        <h2 style="margin: 0.5rem 0; font-size: 1.2rem;">
-                            <a href="{{ route('wisata.show', $item) }}" style="text-decoration: none; color: #111827;">
-                                {{ $item->name }}
-                            </a>
-                        </h2>
+        {{-- Kolom Kiri (8 kolom) --}}
+        <div class="lg:col-span-8">
+            <div class="flex items-center justify-between mb-5">
+                <h1 class="text-xl font-extrabold text-gray-900">
+                    {{ request('category') ? 'Kategori: ' . request('category') : 'Rekomendasi Untukmu' }}
+                </h1>
+                @if (request()->filled('search') || request()->filled('category'))
+                    <a href="{{ route('wisata.index') }}" class="text-xs font-semibold text-rose-600 hover:underline">
+                        Reset filter
+                    </a>
+                @endif
+            </div>
 
-                        <p style="margin: 0.25rem 0; font-size: 0.9rem; color: #059669; font-weight: bold;">
-                            {{ $item->price_range }}
-                        </p>
+            @if ($destinations->count() > 0)
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                    @foreach ($destinations as $item)
+                        <a href="{{ route('wisata.show', $item) }}" class="group block bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-rose-200 transition">
+                            {{-- Area Gambar + Badge --}}
+                            <div class="relative h-36 bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100 overflow-hidden">
+                                @if ($item->image_url)
+                                    <img src="{{ $item->image_url }}" alt="{{ $item->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-rose-300 text-4xl">
+                                        🏞️
+                                    </div>
+                                @endif
 
-                        <p style="margin: 0.25rem 0 0.75rem; font-size: 0.85rem; color: #6b7280;">
-                            📍 {{ $item->address ?? 'Alamat belum diisi' }}
-                        </p>
+                                {{-- Badge Kategori (Kiri Atas) --}}
+                                <span class="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur text-gray-800 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
+                                    {{ $item->category }}
+                                </span>
 
-                        <p style="margin: 0; font-size: 0.9rem; color: #374151; line-height: 1.5;">
-                            {{ \Illuminate\Support\Str::limit($item->description, 110) }}
-                        </p>
-                    </div>
+                                {{-- Badge KLIK (Kanan Atas) --}}
+                                <span class="absolute top-2.5 right-2.5 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm group-hover:bg-rose-700 transition">
+                                    KLIK &rsaquo;
+                                </span>
+                            </div>
 
-                    <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;">
-                        <a href="{{ route('wisata.show', $item) }}" style="color: #2563eb; font-weight: bold; text-decoration: none; font-size: 0.9rem;">
-                            Lihat Detail &rarr;
+                            {{-- Info Kartu --}}
+                            <div class="p-3.5">
+                                <h2 class="font-bold text-gray-900 text-sm truncate group-hover:text-rose-600 transition">
+                                    {{ $item->name }}
+                                </h2>
+                                <div class="flex items-center gap-1.5 mt-1 text-xs text-gray-500">
+                                    <span class="text-amber-500 font-bold">★ {{ number_format($item->reviews_avg_rating ?? 0, 1) }}</span>
+                                    <span>&middot;</span>
+                                    <span>{{ $item->reviews_count }} review</span>
+                                </div>
+                                <p class="text-[11px] text-emerald-600 font-semibold mt-1.5 truncate">
+                                    {{ $item->price_range }}
+                                </p>
+                            </div>
                         </a>
-                        <a href="{{ route('wisata.edit', $item) }}" style="color: #6b7280; text-decoration: none; font-size: 0.85rem;">
-                            Edit
-                        </a>
-                    </div>
+                    @endforeach
                 </div>
-            @endforeach
+            @else
+                <div class="text-center py-12 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400 text-sm">
+                    Destinasi tidak ditemukan. Coba kata kunci atau kategori lain.
+                </div>
+            @endif
         </div>
-    @else
-        <p style="color: #6b7280; padding: 2rem; text-align: center; border: 1px dashed #d1d5db; border-radius: 8px;">
-            Tidak ada tempat wisata yang ditemukan.
-        </p>
-    @endif
+
+        {{-- Kolom Kanan: Sidebar Pink Lembut (4 kolom) --}}
+        <aside class="lg:col-span-4 bg-[#FFF5F7] rounded-2xl p-6 border border-rose-100/70">
+            <h2 class="font-bold text-gray-900 text-sm flex items-center gap-2 mb-5">
+                <span>🏆</span> Destinasi Terpopuler
+            </h2>
+
+            <div class="space-y-4 mb-6">
+                @foreach ($destinations->sortByDesc('reviews_count')->take(3) as $index => $top)
+                    <a href="{{ route('wisata.show', $top) }}" class="flex items-center gap-3 group">
+                        <span class="text-xs font-bold text-gray-400 w-3">{{ $loop->iteration }}</span>
+                        <div class="w-9 h-9 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                            {{ strtoupper(substr($top->name, 0, 2)) }}
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-rose-700 group-hover:underline truncate">{{ $top->name }}</p>
+                            <p class="text-xs text-gray-500">{{ $top->reviews_count }} review &middot; ★ {{ number_format($top->reviews_avg_rating ?? 0, 1) }}</p>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+
+            <a href="{{ route('wisata.create') }}" class="block w-full text-center bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm py-3 rounded-xl shadow-sm transition">
+                + Tambah Destinasi Baru
+            </a>
+        </aside>
+
+    </div>
 @endsection

@@ -42,6 +42,7 @@ class DestinationController extends Controller
             'price_range' => ['required', 'string', 'max:50'],
             'description' => ['required', 'string'],
             'address' => ['nullable', 'string', 'max:255'],
+            'image_url' => ['nullable', 'url', 'max:500'], 
         ]);
 
         Destination::create($data);
@@ -70,6 +71,7 @@ class DestinationController extends Controller
             'price_range' => ['required', 'string', 'max:50'],
             'description' => ['required', 'string'],
             'address' => ['nullable', 'string', 'max:255'],
+            'image_url' => ['nullable', 'url', 'max:500'], 
         ]);
 
         $destination->update($data);
