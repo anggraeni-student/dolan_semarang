@@ -25,7 +25,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('wisata.store') }}" method="POST" class="space-y-5">
+            <form action="{{ route('wisata.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                 @csrf
 
                 <div>
@@ -59,9 +59,9 @@
                 </div>
 
                 <div>
-                    <label for="image_url" class="block text-xs font-bold text-gray-700 mb-1.5">Link Foto Wisata (Opsional)</label>
-                    <input type="url" id="image_url" name="image_url" value="{{ old('image_url') }}" placeholder="https://contoh.com/foto-wisata.jpg"
-                           class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400">
+                    <label for="image" class="block text-xs font-bold text-gray-700 mb-1.5">Foto Wisata (Opsional, maks 2MB)</label>
+                    <input type="file" id="image" name="image" accept="image/*"
+                           class="w-full border border-gray-200 rounded-xl px-3.5 py-2 text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100">
                 </div>
 
                 <div>
@@ -93,7 +93,7 @@
                 </li>
                 <li class="flex gap-2.5">
                     <span class="w-5 h-5 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">2</span>
-                    <span>Sertakan link foto (URL gambar) agar kartu wisata di halaman depan tampil lebih menarik.</span>
+                    <span>Upload foto wisata terbaik (JPG/PNG/WebP) agar kartu di halaman depan tampil lebih menarik.</span>
                 </li>
                 <li class="flex gap-2.5">
                     <span class="w-5 h-5 rounded-full bg-rose-600 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">3</span>

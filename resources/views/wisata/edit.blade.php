@@ -25,7 +25,7 @@
             </div>
         @endif
 
-        <form action="{{ route('wisata.update', $destination) }}" method="POST" class="space-y-5">
+        <form action="{{ route('wisata.update', $destination) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
             @csrf
             @method('PUT')
 
@@ -62,9 +62,12 @@
             </div>
 
             <div>
-                <label for="image_url" class="block text-xs font-bold text-gray-700 mb-1.5">Link Foto Wisata (Opsional)</label>
-                <input type="url" id="image_url" name="image_url" value="{{ old('image_url', $destination->image_url) }}" placeholder="https://contoh.com/foto-wisata.jpg"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400">
+                <label for="image" class="block text-xs font-bold text-gray-700 mb-1.5">Ganti Foto Wisata (Opsional, maks 2MB)</label>
+                @if ($destination->image_url)
+                    <img src="{{ $destination->image_url }}" alt="{{ $destination->name }}" class="h-28 w-44 object-cover rounded-xl mb-2.5 border border-gray-200">
+                @endif
+                <input type="file" id="image" name="image" accept="image/*"
+                       class="w-full border border-gray-200 rounded-xl px-3.5 py-2 text-sm bg-white file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100">
             </div>
 
             <div>

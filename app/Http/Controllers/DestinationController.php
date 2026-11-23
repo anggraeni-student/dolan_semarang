@@ -42,8 +42,13 @@ class DestinationController extends Controller
             'price_range' => ['required', 'string', 'max:50'],
             'description' => ['required', 'string'],
             'address' => ['nullable', 'string', 'max:255'],
-            'image_url' => ['nullable', 'url', 'max:500'], 
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('destinations', 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
 
         Destination::create($data);
 
@@ -71,8 +76,13 @@ class DestinationController extends Controller
             'price_range' => ['required', 'string', 'max:50'],
             'description' => ['required', 'string'],
             'address' => ['nullable', 'string', 'max:255'],
-            'image_url' => ['nullable', 'url', 'max:500'], 
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('destinations', 'public');
+            $data['image_url'] = '/storage/' . $path;
+        }
 
         $destination->update($data);
 
@@ -97,7 +107,13 @@ class DestinationController extends Controller
             'user_name' => ['required', 'string', 'max:100'],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['required', 'string'],
+            'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('reviews', 'public');
+            $data['photo_url'] = '/storage/' . $path;
+        }
 
         $destination->reviews()->create($data);
 
