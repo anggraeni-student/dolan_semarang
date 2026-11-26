@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Destination;
+use App\Models\Review;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -101,14 +103,15 @@ class DestinationController extends Controller
             ->with('success', "Destinasi {$nama} berhasil dihapus.");
     }
 
-    public function storeReview(Request $request, Destination $destination): RedirectResponse
+    public function storeReview(Request $request, Destination $destination): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
-            'user_name' => ['required', 'string', 'max:100'],
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['required', 'string'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
+
+        $data['user_name'] = $request->user()->name;
 
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('reviews', 'public');
@@ -117,8 +120,59 @@ class DestinationController extends Controller
 
         $destination->reviews()->create($data);
 
+        if ($request->expectsJson()) {
+            return $this->reviewsJson($destination);
+        }
+
         return redirect()
             ->route('wisata.show', $destination)
             ->with('success', 'Terima kasih! Ulasan kamu berhasil dikirim.');
+    }
+
+    public function reviewsJson(Destination $destination): JsonResponse
+    {
+        $reviews = $destination->reviews()->latest()->get();
+        $total = $reviews->count();
+        $avg = $total > 0 ? $reviews->avg('rating') : 0;
+
+        $breakdown = [];
+        for ($star = 5; $star >= 1; $star--) {
+            $count = $reviews->where('rating', $star)->count();
+            $breakdown[] = [
+                'star' => $star,
+                'percent' => $total > 0 ? round(($count / $total) * 100) : 0,
+            ];
+        }
+
+        return response()->json([
+            'total_reviews' => $total,
+            'avg_rating' => number_format($avg, 1),
+            'avg_round' => (int) round($avg),
+            'breakdown' => $breakdown,
+            'reviews' => $reviews->map(fn ($r) => [
+                'id' => $r->id,
+                'user_name' => $r->user_name,
+                'initials' => strtoupper(substr($r->user_name, 0, 2)),
+                'rating' => $r->rating,
+                'comment' => $r->comment,
+                'photo_url' => $r->photo_url,
+                'time_ago' => $r->created_at->diffForHumans(),
+            ]),
+        ]);
+    }
+
+    public function reviews(): View
+    {
+        $reviews = Review::with('destination')->latest()->get();
+        $totalReviews = $reviews->count();
+        $avgRating = $totalReviews > 0 ? $reviews->avg('rating') : 0;
+
+        $topContributors = Review::selectRaw('user_name, COUNT(*) as total_reviews')
+            ->groupBy('user_name')
+            ->orderByDesc('total_reviews')
+            ->take(5)
+            ->get();
+
+        return view('reviews.index', compact('reviews', 'totalReviews', 'avgRating', 'topContributors'));
     }
 }
