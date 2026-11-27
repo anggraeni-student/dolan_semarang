@@ -13,6 +13,7 @@ class Destination extends Model
     protected $fillable = [
         'slug', 'name', 'category_id', 'location', 'description', 'hero_image',
         'lat', 'lng', 'htm', 'opening_hours', 'best_time', 'access_info', 'is_featured',
+        'budget_range', 'area',
     ];
 
     protected $casts = [
@@ -36,7 +37,6 @@ class Destination extends Model
         return $this->belongsToMany(Collection::class);
     }
 
-    /** Rata-rata skor gabungan 4 aspek */
     public function getRatingAttribute(): float
     {
         $agg = $this->reviews()
@@ -60,5 +60,19 @@ class Destination extends Model
     {
         return $query->withAvg('reviews', \DB::raw('(score_view+score_access+score_cleanliness+score_facility)/4.0'))
             ->orderByDesc('reviews_avg_' . \DB::raw('(score_view+score_access+score_cleanliness+score_facility)/4.0'));
+    }
+
+    public function scopeFilterSemarang(Builder $query, $request): Builder
+    {
+        return $query
+            ->when($request->filled('budget'), function ($q) use ($request) {
+                $q->where('budget_range', $request->budget);
+            })
+            ->when($request->filled('area'), function ($q) use ($request) {
+                $q->where('area', $request->area);
+            })
+            ->when($request->filled('best_time'), function ($q) use ($request) {
+                $q->where('best_time', $request->best_time);
+            });
     }
 }
