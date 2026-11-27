@@ -4,8 +4,9 @@
 @section('content')
     <div class="crumb">
         <a href="{{ route('home') }}">Home</a> /
-        <a href="{{ route('reviews.index', $destination->slug) }}">Review</a> /
-        Tulis
+        <a href="{{ route('destinations.index') }}">Tempat</a> /
+        <a href="{{ route('destinations.show', $destination->slug) }}">{{ $destination->name }}</a> /
+        Tulis Review
     </div>
 
     @php

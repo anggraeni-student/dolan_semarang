@@ -23,15 +23,15 @@
                 Dolan Semarang
             </a>
             <div class="nav-links">
-                <a href="{{ route('categories.show', 'kuliner') }}" class="{{ request()->routeIs('categories.show') ? 'active' : '' }}">Tempat</a>
-                <a href="{{ route('reviews.index', 'kota-lama') }}" class="{{ request()->routeIs('reviews.*') && !request()->routeIs('reviews.create') ? 'active' : '' }}">Review</a>
+                <a href="{{ route('destinations.index') }}" class="{{ request()->routeIs('destinations.index', 'destinations.show', 'categories.show', 'destinations.create') ? 'active' : '' }}">Tempat</a>
+                <a href="{{ route('reviews.all') }}" class="{{ request()->routeIs('reviews.*') ? 'active' : '' }}">Review</a>
                 <a href="{{ route('articles.index') }}" class="{{ request()->routeIs('articles.*') ? 'active' : '' }}">Panduan</a>
                 <a href="{{ route('community.index') }}" class="{{ request()->routeIs('community.*') ? 'active' : '' }}">Komunitas</a>
             </div>
-            <div class="nav-search">
+            <form class="nav-search" method="GET" action="{{ route('search') }}" role="search">
                 <span class="material-icons" style="font-size:17px">search</span>
-                Cari destinasi…
-            </div>
+                <input type="search" name="q" value="{{ request()->query('q') }}" placeholder="Cari destinasi…" aria-label="Cari destinasi" autocomplete="off" style="border:none;background:none;outline:none;flex:1;min-width:0;font:inherit;color:var(--ink);font-size:13px">
+            </form>
             <div class="nav-user">
                 @auth
                     <a href="{{ route('profiles.show', auth()->user()->username) }}" class="avatar" style="width:36px;height:36px;font-size:13px" title="{{ auth()->user()->name }}">
@@ -49,18 +49,32 @@
         </div>
     </nav>
 
-    <div class="cat-strip">
-        <div class="container inner" style="padding:0">
-            <div class="inner" style="padding:10px 0;overflow-x:auto">
-                @foreach ($categories ?? \App\Models\Category::orderBy('position')->get() as $cat)
-                    <a href="{{ route('categories.show', $cat->slug) }}"
-                       class="cat-chip {{ request()->routeIs('categories.show') && request()->route('slug') === $cat->slug ? 'active' : '' }}">
-                        <span class="material-icons" style="font-size:15px">{{ $cat->icon }}</span>{{ $cat->name }}
-                    </a>
-                @endforeach
+    {{-- Strip kategori: HANYA di halaman yang memang tentang destinasi
+         (index semua destinasi, kategori, detail, form tambah). Halaman
+         review/artikel/komunitas/peta/profil tidak lagi menampilkan
+         filter kategori yang tidak relevan. --}}
+    @php
+        $showCatStrip = request()->routeIs('destinations.index', 'categories.show', 'destinations.show', 'destinations.create');
+    @endphp
+    @if ($showCatStrip)
+        <div class="cat-strip">
+            <div class="container inner" style="padding:0">
+                <div class="inner" style="padding:10px 0;overflow-x:auto">
+                    @foreach ($categories ?? \App\Models\Category::orderBy('position')->get() as $cat)
+                        <a href="{{ route('categories.show', $cat->slug) }}"
+                           class="cat-chip {{ request()->routeIs('categories.show') && request()->route('slug') === $cat->slug ? 'active' : '' }}">
+                            <span class="material-icons" style="font-size:15px">{{ $cat->icon }}</span>{{ $cat->name }}
+                        </a>
+                    @endforeach
+                    @auth
+                        <a href="{{ route('destinations.create') }}" class="cat-chip" style="border-style:dashed;font-weight:800">
+                            <span class="material-icons" style="font-size:15px">add_location_alt</span>Tambah Tempat
+                        </a>
+                    @endauth
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 
     <main class="container page-body">
         @if (session('success'))
@@ -81,6 +95,7 @@
             <div>
                 <h4>Dolan Semarang</h4>
                 <a href="{{ route('home') }}">Homepage</a>
+                <a href="{{ route('destinations.index') }}">Semua Destinasi</a>
                 <a href="{{ route('map.index') }}">Peta Destinasi</a>
                 <a href="{{ route('articles.index') }}">Panduan Perjalanan</a>
                 <a href="{{ route('community.index') }}">Komunitas</a>
@@ -94,7 +109,8 @@
             <div>
                 <h4>Komunitas</h4>
                 <a href="{{ route('profiles.show', 'dina-rahma') }}">Reviewer Teratas</a>
-                <a href="{{ route('reviews.create', 'kota-lama') }}">Tulis Review</a>
+                <a href="{{ route('reviews.all') }}">Jelajah Review</a>
+                <a href="{{ route('destinations.create') }}">+ Tambah Tempat</a>
                 <a href="{{ route('login') }}">Masuk / Daftar</a>
             </div>
         </div>

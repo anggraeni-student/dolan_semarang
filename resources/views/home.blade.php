@@ -14,7 +14,7 @@
         <div class="section" style="margin-top:20px">
             <div class="section-title">
                 <h2>Sesuai Minatmu</h2>
-                <a class="see-all" href="{{ route('categories.show', $forYou->first()->category->slug) }}">Lihat semua ›</a>
+                <a class="see-all" href="{{ route('destinations.index') }}">Lihat semua ›</a>
             </div>
             <div class="grid-cards">
                 @foreach ($forYou as $destination)
@@ -28,7 +28,7 @@
     <div class="section">
         <div class="section-title">
             <h2>Tempat Populer</h2>
-            <a class="see-all" href="{{ route('categories.show', 'kuliner') }}">Lihat semua ›</a>
+            <a class="see-all" href="{{ route('destinations.index') }}">Lihat semua ›</a>
         </div>
         <div class="grid-cards">
             @foreach ($destinations as $destination)
@@ -46,7 +46,7 @@
             </div>
             @foreach ($articles as $article)
                 <a href="{{ route('articles.show', $article->slug) }}" class="card card-link" style="display:flex;gap:14px;padding:12px;margin-bottom:12px;align-items:center">
-                    <img src="{{ asset($article->cover_image) }}" alt="{{ $article->title }}" style="width:96px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0">
+                    <img src="{{ asset($article->cover_image) }}" alt="{{ $article->title }}" style="width:96px;height:72px;object-fit:cover;border-radius:10px;flex-shrink:0" loading="lazy">
                     <div>
                         <span class="tag" style="background:var(--pink-soft)">{{ $article->tag }}</span>
                         <div style="font-weight:800;font-size:14.5px;margin-top:6px">{{ $article->title }}</div>
@@ -75,9 +75,10 @@
                 @endforeach
                 <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
                     @auth
-                        <a href="{{ route('reviews.create', 'kota-lama') }}" class="btn btn-primary">+ Tulis Review</a>
+                        <a href="{{ route('destinations.create') }}" class="btn btn-primary">+ Tambah Tempat</a>
+                        <a href="{{ route('reviews.all') }}" class="btn btn-outline">Jelajah Review</a>
                     @else
-                        <a href="{{ route('register') }}" class="btn btn-primary">+ Tulis Review</a>
+                        <a href="{{ route('register') }}" class="btn btn-primary">+ Gabung & Kontribusi</a>
                     @endauth
                     <a href="{{ route('community.index') }}" class="btn btn-outline">Lihat Komunitas</a>
                 </div>

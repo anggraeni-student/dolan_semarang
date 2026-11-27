@@ -57,17 +57,17 @@
             @endif
 
             @foreach ($threads as $thread)
-                <div class="card" style="padding:16px;margin-bottom:14px">
+                {{-- Kartu sekarang bisa DIKLIK menuju halaman thread --}}
+                <a href="{{ route('community.show', $thread) }}" class="card card-link" style="display:block;padding:16px;margin-bottom:14px">
                     <div><span class="tag" style="font-size:10px;letter-spacing:.6px">{{ $thread->type === 'tanya' ? 'TANYA DESTINASI' : 'CERITA PERJALANAN' }}</span></div>
                     <h3 style="font-weight:800;font-size:17px;line-height:1.35;margin:7px 0 8px">{{ $thread->title }}</h3>
                     <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);flex-wrap:wrap">
-                        <a href="{{ route('profiles.show', $thread->user->username) }}" class="avatar" style="width:28px;height:28px;font-size:11px" title="Lihat profil {{ $thread->user->name }}">
-                            {{ $thread->user->avatar_initials }}
-                        </a>
-                        <a href="{{ route('profiles.show', $thread->user->username) }}" style="font-weight:700;color:var(--ink-mid)">{{ $thread->user->name }}</a>
-                        · {{ $thread->reply_count }} balasan · terakhir {{ $thread->last_activity_at->diffForHumans() }}
+                        <span class="avatar" style="width:28px;height:28px;font-size:11px">{{ $thread->user->avatar_initials }}</span>
+                        <span style="font-weight:700;color:var(--ink-mid)">{{ $thread->user->name }}</span>
+                        · {{ $thread->replies_count }} balasan · terakhir {{ $thread->last_activity_at->diffForHumans() }}
+                        <span class="material-icons" style="font-size:15px;color:var(--primary);margin-left:auto" title="Buka thread">arrow_forward</span>
                     </div>
-                </div>
+                </a>
             @endforeach
         </div>
 

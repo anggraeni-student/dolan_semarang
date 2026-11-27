@@ -10,6 +10,40 @@ use Illuminate\View\View;
 
 class ReviewController extends Controller
 {
+    /** Halaman "Semua Review" komunitas (lintas destinasi) */
+    public function all(Request $request): View
+    {
+        $sort = $request->query('sort', 'helpful');
+
+        $query = Review::with('user', 'destination.category');
+
+        // filter kategori destinasi (opsional)
+        $activeCategory = null;
+        if ($catSlug = $request->query('kategori')) {
+            $activeCategory = Category::where('slug', $catSlug)->first();
+            if ($activeCategory) {
+                $query->whereHas('destination.category', fn ($q) => $q->where('slug', $catSlug));
+            }
+        }
+
+        $reviews = match ($sort) {
+            'recent' => $query->latest()->get(),
+            'rating' => $query->get()->sortByDesc(fn ($r) => $r->score),
+            default => $query->orderByDesc('helpful_count')->get(),
+        };
+
+        return view('reviews.all', [
+            'categories' => Category::orderBy('position')->get(),
+            'reviews' => $reviews,
+            'sort' => $sort,
+            'activeCategory' => $activeCategory,
+            'topDestinations' => Destination::with('category', 'reviews')
+                ->get()
+                ->sortByDesc(fn ($d) => $d->rating)
+                ->take(5),
+        ]);
+    }
+
     /** Halaman "Semua Review" untuk satu destinasi */
     public function index(string $slug): View
     {

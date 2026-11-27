@@ -13,6 +13,7 @@ class Destination extends Model
     protected $fillable = [
         'slug', 'name', 'category_id', 'location', 'description', 'hero_image',
         'lat', 'lng', 'htm', 'opening_hours', 'best_time', 'access_info', 'is_featured',
+        'created_by',
     ];
 
     protected $casts = [
@@ -24,6 +25,12 @@ class Destination extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** User (kontributor komunitas) yang menambahkan tempat ini */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function reviews(): HasMany

@@ -4,6 +4,7 @@
 @section('content')
     <div class="crumb">
         <a href="{{ route('home') }}">Home</a> /
+        <a href="{{ route('destinations.index') }}">Tempat</a> /
         <a href="{{ route('categories.show', $destination->category->slug) }}">{{ $destination->category->name }}</a> /
         {{ $destination->name }}
     </div>
@@ -26,6 +27,13 @@
                 <a href="{{ route('reviews.index', $destination->slug) }}" style="font-weight:700">{{ $destination->review_count }} review ›</a>
             </div>
             <p style="color:var(--ink-mid);font-size:14.5px">{{ $destination->description }}</p>
+            @if ($destination->creator)
+                <div class="card-meta" style="margin-top:10px">
+                    <span class="material-icons" style="font-size:14px;vertical-align:-2px;color:var(--primary)">volunteer_activism</span>
+                    Ditambahkan oleh kontributor
+                    <a href="{{ route('profiles.show', $destination->creator->username) }}" style="font-weight:700;color:var(--ink)">{{ $destination->creator->name }}</a>
+                </div>
+            @endif
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
                 @auth
                     <a href="{{ route('reviews.create', $destination->slug) }}" class="btn btn-primary">✍ Tulis Review</a>
