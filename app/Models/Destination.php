@@ -2,63 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Destination extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'slug', 'name', 'category_id', 'location', 'description', 'hero_image',
-        'lat', 'lng', 'htm', 'opening_hours', 'best_time', 'access_info', 'is_featured',
+        'name',
+        'slug',
+        'category',
+        'price_range',
+        'budget_tier',
+        'area',
+        'best_time',
+        'opening_hours',
+        'address',
+        'description',
+        'image_url',
     ];
 
-    protected $casts = [
-        'lat' => 'float',
-        'lng' => 'float',
-        'is_featured' => 'boolean',
-    ];
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function reviews(): HasMany
+    public function reviews()
     {
         return $this->hasMany(Review::class);
-    }
-
-    public function collections(): BelongsToMany
-    {
-        return $this->belongsToMany(Collection::class);
-    }
-
-    /** Rata-rata skor gabungan 4 aspek */
-    public function getRatingAttribute(): float
-    {
-        $agg = $this->reviews()
-            ->selectRaw('avg((score_view+score_access+score_cleanliness+score_facility)/4.0) as avg_score, count(*) as total')
-            ->first();
-
-        return $agg && $agg->avg_score ? round((float) $agg->avg_score, 1) : 0.0;
-    }
-
-    public function getReviewCountAttribute(): int
-    {
-        return (int) $this->reviews()->count();
-    }
-
-    public function scopeFeatured(Builder $query): Builder
-    {
-        return $query->where('is_featured', true);
-    }
-
-    public function scopeTopRated(Builder $query): Builder
-    {
-        return $query->withAvg('reviews', \DB::raw('(score_view+score_access+score_cleanliness+score_facility)/4.0'))
-            ->orderByDesc('reviews_avg_' . \DB::raw('(score_view+score_access+score_cleanliness+score_facility)/4.0'));
     }
 }

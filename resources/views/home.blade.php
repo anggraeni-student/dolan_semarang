@@ -9,6 +9,8 @@
         <p style="color:var(--ink-mid);max-width:560px">Review jujur dari warga — temukan tempat asyik berikutnya di Semarang & sekitarnya, baca pengalaman asli, lalu bagikan ceritamu.</p>
     </div>
 
+    <x-semarang-filters />
+
     {{-- Rekomendasi personal (kalau user punya minat) --}}
     @if ($forYou && $forYou->isNotEmpty())
         <div class="section" style="margin-top:20px">
