@@ -2,32 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Review extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id', 'destination_id', 'score_view', 'score_access',
-        'score_cleanliness', 'score_facility', 'body',
-        'helpful_count', 'photo_count', 'visited_at',
+        'destination_id',
+        'user_name',
+        'rating',
+        'visit_time_tag',
+        'comment',
+        'photo_url',
     ];
 
-    protected $casts = ['visited_at' => 'date'];
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function destination(): BelongsTo
+    public function destination()
     {
         return $this->belongsTo(Destination::class);
-    }
-
-    /** Rata-rata skor review ini */
-    public function getScoreAttribute(): float
-    {
-        return round(($this->score_view + $this->score_access + $this->score_cleanliness + $this->score_facility) / 4, 1);
     }
 }
