@@ -49,6 +49,25 @@
                     <a href="{{ route('login') }}" class="btn btn-primary">✍ Tulis Review</a>
                 @endauth
                 <a href="{{ route('map.index') }}" class="btn btn-outline">Lihat di Peta</a>
+
+                @auth
+                    @php
+                        $isWishlisted = \App\Models\Wishlist::where('user_id', auth()->id())
+                            ->where('destination_id', $destination->id)
+                            ->exists();
+                    @endphp
+                    <form method="POST" action="{{ route('wishlist.toggle', $destination) }}">
+                        @csrf
+                        <button type="submit" class="btn {{ $isWishlisted ? 'btn-primary' : 'btn-outline' }}" style="display:inline-flex;align-items:center;gap:6px">
+                            <span class="material-icons" style="font-size:17px">{{ $isWishlisted ? 'favorite' : 'favorite_border' }}</span>
+                            {{ $isWishlisted ? 'Tersimpan di Wishlist' : 'Simpan ke Wishlist' }}
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-outline" style="display:inline-flex;align-items:center;gap:6px">
+                        <span class="material-icons" style="font-size:17px">favorite_border</span> Simpan ke Wishlist
+                    </a>
+                @endauth
             </div>
         </div>
     </div>

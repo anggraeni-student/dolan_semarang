@@ -50,6 +50,12 @@
             </form>
             <div class="nav-user">
                 @auth
+                    <a href="{{ route('wishlist.index') }}" class="btn btn-ghost {{ request()->routeIs('wishlist.*') ? 'active' : '' }}" style="padding:8px 10px;display:inline-flex;align-items:center;gap:4px">
+                        <span class="material-icons" style="font-size:17px;color:var(--primary)">favorite_border</span> Wishlist
+                    </a>
+                    <a href="{{ route('itineraries.index') }}" class="btn btn-ghost {{ request()->routeIs('itineraries.*') ? 'active' : '' }}" style="padding:8px 10px;display:inline-flex;align-items:center;gap:4px">
+                        <span class="material-icons" style="font-size:17px;color:var(--primary)">event_note</span> Trip Planner
+                    </a>
                     @if (auth()->user()->is_admin)
                         <a href="/admin" title="Buka panel admin Filament" style="display:inline-flex;align-items:center;gap:5px;background:#2B2432;color:#FFFFFF;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:10px;text-decoration:none">
                             <span class="material-icons" style="font-size:15px">admin_panel_settings</span>Panel Admin

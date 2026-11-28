@@ -7,12 +7,14 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ItineraryController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\ModerationController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +68,19 @@ Route::middleware('auth')->group(function () {
 
     // Thread komunitas + balasan
     Route::post('/komunitas', [CommunityController::class, 'store'])->name('community.store');
+
+    // Fitur Wishlist (Khusus Login)
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/wishlist/{destination}/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
+
+    // Fitur Trip Planner / Rencana Perjalanan (Khusus Login)
+    Route::get('/rencana-trip', [ItineraryController::class, 'index'])->name('itineraries.index');
+    Route::post('/rencana-trip', [ItineraryController::class, 'store'])->name('itineraries.store');
+    Route::get('/rencana-trip/{itinerary}', [ItineraryController::class, 'show'])->name('itineraries.show');
+    Route::delete('/rencana-trip/{itinerary}', [ItineraryController::class, 'destroy'])->name('itineraries.destroy');
+    Route::post('/rencana-trip/{itinerary}/items', [ItineraryController::class, 'storeItem'])->name('itineraries.items.store');
+    Route::delete('/rencana-trip/{itinerary}/items/{item}', [ItineraryController::class, 'destroyItem'])->name('itineraries.items.destroy');
+
     Route::post('/komunitas/{thread}/balas', [CommunityController::class, 'reply'])->whereNumber('thread')->name('community.reply');
 
     // Simpan destinasi baru dari user
