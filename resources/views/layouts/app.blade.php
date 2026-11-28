@@ -34,6 +34,12 @@
             </div>
             <div class="nav-user">
                 @auth
+                    <a href="{{ route('wishlist.index') }}" class="btn btn-ghost {{ request()->routeIs('wishlist.*') ? 'active' : '' }}" style="padding:8px 10px;display:inline-flex;align-items:center;gap:4px">
+                        <span class="material-icons" style="font-size:17px;color:var(--primary)">favorite_border</span> Wishlist
+                    </a>
+                    <a href="{{ route('itineraries.index') }}" class="btn btn-ghost {{ request()->routeIs('itineraries.*') ? 'active' : '' }}" style="padding:8px 10px;display:inline-flex;align-items:center;gap:4px">
+                        <span class="material-icons" style="font-size:17px;color:var(--primary)">event_note</span> Trip Planner
+                    </a>
                     <a href="{{ route('profiles.show', auth()->user()->username) }}" class="avatar" style="width:36px;height:36px;font-size:13px" title="{{ auth()->user()->name }}">
                         {{ auth()->user()->avatar_initials }}
                     </a>
