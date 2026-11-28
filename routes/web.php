@@ -3,12 +3,15 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CommunityController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MapController;
+use App\Http\Controllers\ModerationController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +46,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/masuk', [AuthController::class, 'login'])->name('login.attempt');
     Route::get('/daftar', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/daftar', [AuthController::class, 'register'])->name('register.store');
+
+    // Lupa password (nama route password.* dipakai notifikasi bawaan Laravel)
+    Route::get('/lupa-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/lupa-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
 
@@ -64,4 +73,16 @@ Route::middleware('auth')->group(function () {
 
     // Edit profil & preferensi sendiri
     Route::post('/u/{username}/update', [ProfileController::class, 'update'])->name('profiles.update');
+
+    // Lapor konten (review / thread / balasan / destinasi)
+    Route::post('/lapor', [ReportController::class, 'store'])->name('reports.store');
+
+    // Kotak chat dengan tim admin
+    Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
+    Route::post('/chat/{conversation}/kirim', [ChatController::class, 'send'])->name('chat.send');
+
+    // Moderasi admin (bisa diakses dari dashboard biasa, tanpa buka /admin)
+    Route::get('/moderasi', [ModerationController::class, 'index'])->name('moderation.index');
+    Route::post('/moderasi/laporan/{report}/tindak', [ModerationController::class, 'action'])->name('moderation.action');
+    Route::post('/moderasi/hapus', [ModerationController::class, 'destroy'])->name('moderation.destroy');
 });

@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordId;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
@@ -51,6 +53,41 @@ class User extends Authenticatable implements FilamentUser
     public function interests(): BelongsToMany
     {
         return $this->belongsToMany(Interest::class);
+    }
+
+    /** Utas chat pribadi user dengan tim admin */
+    public function conversation(): HasOne
+    {
+        return $this->hasOne(ChatConversation::class);
+    }
+
+    /** Laporan yang dibuat user */
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    /** Jumlah pesan chat yang belum dibaca (badge nav).
+     *  Admin melihat pesan belum-baca dari semua member; user dari admin. */
+    public function chatUnreadCount(): int
+    {
+        if ($this->is_admin) {
+            $adminIds = static::where('is_admin', true)->pluck('id');
+            return (int) ChatMessage::whereNull('read_at')
+                ->whereNotIn('sender_id', $adminIds)
+                ->count();
+        }
+
+        return (int) ChatMessage::whereNull('read_at')
+            ->where('sender_id', '!=', $this->id)
+            ->whereIn('conversation_id', ChatConversation::where('user_id', $this->id)->pluck('id'))
+            ->count();
+    }
+
+    /** Email reset password berbahasa Indonesia */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordId($token));
     }
 
     /** Total suara "membantu" yang diterima user */

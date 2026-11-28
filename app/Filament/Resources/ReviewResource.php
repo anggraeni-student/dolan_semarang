@@ -67,7 +67,6 @@ class ReviewResource extends Resource
                     ->relationship('destination', 'name')->searchable()->preload(),
             ])
             ->actions([
-                Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -83,7 +82,6 @@ class ReviewResource extends Resource
         return [
             'index' => Pages\ListReviews::route('/'),
             'create' => Pages\CreateReview::route('/create'),
-            'edit' => Pages\EditReview::route('/{record}/edit'),
         ];
     }
 }

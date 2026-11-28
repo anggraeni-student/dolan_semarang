@@ -27,6 +27,22 @@
                 <a href="{{ route('reviews.all') }}" class="{{ request()->routeIs('reviews.*') ? 'active' : '' }}">Review</a>
                 <a href="{{ route('articles.index') }}" class="{{ request()->routeIs('articles.*') ? 'active' : '' }}">Panduan</a>
                 <a href="{{ route('community.index') }}" class="{{ request()->routeIs('community.*') ? 'active' : '' }}">Komunitas</a>
+                @auth
+                    <a href="{{ route('chat.index') }}" class="{{ request()->routeIs('chat.*') ? 'active' : '' }}">
+                        Chat
+                        @if (($chatUnread = auth()->user()->chatUnreadCount()) > 0)
+                            <span class="nav-badge">{{ $chatUnread > 9 ? '9+' : $chatUnread }}</span>
+                        @endif
+                    </a>
+                    @if (auth()->user()->is_admin)
+                        <a href="{{ route('moderation.index') }}" class="{{ request()->routeIs('moderation.*') ? 'active' : '' }}">
+                            Moderasi
+                            @if (($openReports = \App\Models\Report::where('status', 'open')->count()) > 0)
+                                <span class="nav-badge">{{ $openReports > 9 ? '9+' : $openReports }}</span>
+                            @endif
+                        </a>
+                    @endif
+                @endauth
             </div>
             <form class="nav-search" method="GET" action="{{ route('search') }}" role="search">
                 <span class="material-icons" style="font-size:17px">search</span>
@@ -34,6 +50,11 @@
             </form>
             <div class="nav-user">
                 @auth
+                    @if (auth()->user()->is_admin)
+                        <a href="/admin" title="Buka panel admin Filament" style="display:inline-flex;align-items:center;gap:5px;background:#2B2432;color:#FFFFFF;font-weight:700;font-size:12.5px;padding:8px 14px;border-radius:10px;text-decoration:none">
+                            <span class="material-icons" style="font-size:15px">admin_panel_settings</span>Panel Admin
+                        </a>
+                    @endif
                     <a href="{{ route('profiles.show', auth()->user()->username) }}" class="avatar" style="width:36px;height:36px;font-size:13px" title="{{ auth()->user()->name }}">
                         {{ auth()->user()->avatar_initials }}
                     </a>
@@ -80,6 +101,9 @@
         @if (session('success'))
             <div class="flash">{{ session('success') }}</div>
         @endif
+        @if (session('error'))
+            <div class="flash" style="background:#FDECEF;border-color:#F4C2CC;color:#B3213B">{{ session('error') }}</div>
+        @endif
         @yield('content')
     </main>
 
@@ -116,6 +140,14 @@
         </div>
         <div class="footer-bottom">© 2026 Dolan Semarang — Dibuat untuk warga & pengunjung Semarang Raya.</div>
     </footer>
+
+    <style>
+        .nav-badge {
+            display: inline-block; min-width: 17px; padding: 1px 5px; margin-left: 4px;
+            background: #E23A4E; color: #fff; font-size: 10px; font-weight: 800;
+            border-radius: 99px; text-align: center; vertical-align: 1px; line-height: 1.5;
+        }
+    </style>
 @endif
 
 </body>

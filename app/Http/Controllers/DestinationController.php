@@ -26,18 +26,78 @@ class DestinationController extends Controller
                 ->orWhere('description', 'like', $like));
         }
 
-        $destinations = match ($request->query('sort', 'rating')) {
+        // filter HTM (harga tiket masuk)
+        $htm = (string) $request->query('htm', '');
+        $query->when($htm === 'gratis', fn ($q) => $q->where('htm', 0))
+            ->when($htm === 'murah', fn ($q) => $q->whereBetween('htm', [1, 10000]))
+            ->when($htm === 'sedang', fn ($q) => $q->whereBetween('htm', [10001, 50000]))
+            ->when($htm === 'mahal', fn ($q) => $q->where('htm', '>', 50000));
+
+        $sort = $request->query('sort', 'rating');
+        $destinations = match ($sort) {
             'recent' => $query->latest()->get(),
             'review' => $query->get()->sortByDesc(fn ($d) => $d->review_count),
             default => $query->get()->sortByDesc(fn ($d) => [$d->rating, $d->review_count]),
         };
 
+        // filter jam buka (string jam seperti "06.00-19.00" diparsing)
+        $jam = (string) $request->query('jam', '');
+        if ($jam !== '') {
+            $destinations = $destinations->filter(fn ($d) => $this->matchesJamFilter($d, $jam))->values();
+        }
+
         return view('destinations.index', [
             'categories' => Category::orderBy('position')->get(),
             'destinations' => $destinations,
-            'sort' => $request->query('sort', 'rating'),
+            'sort' => $sort,
             'q' => trim((string) $request->query('q')),
+            'htm' => $htm,
+            'jam' => $jam,
         ]);
+    }
+
+    /** Apakah destinasi cocok dengan filter jam buka (pagi / malam / 24 jam) */
+    private function matchesJamFilter(Destination $destination, string $jam): bool
+    {
+        $span = $this->openingHoursSpan($destination->opening_hours);
+        if ($span === null) {
+            return false;
+        }
+
+        [$open, $close] = $span;
+
+        return match ($jam) {
+            'pagi' => $open <= 9.0,          // buka lebih awal / pagi
+            'malam' => $close >= 18.0,       // masih buka sampai malam
+            '24jam' => $close - $open >= 23.5, // buka (hampir) 24 jam
+            default => true,
+        };
+    }
+
+    /** Parsing "06.00-19.00" → [6.0, 19.0] (jam desimal). Null kalau format tak dikenal. */
+    private function openingHoursSpan(?string $str): ?array
+    {
+        if (!$str) {
+            return null;
+        }
+
+        if (preg_match('/24\s*jam/i', $str)) {
+            return [0.0, 24.0];
+        }
+
+        if (preg_match('/(\d{1,2})[.:]?(\d{2})?\s*(?:-|–|—|s\.?d\.?|sampai)\s*(\d{1,2})[.:]?(\d{2})?/i', $str, $m)) {
+            $open = (int) $m[1] + (int) ($m[2] ?? 0) / 60;
+            $close = (int) $m[3] + (int) ($m[4] ?? 0) / 60;
+            if ($open < 0 || $open > 24 || $close < 0 || $close > 24) {
+                return null;
+            }
+            if ($close <= $open) {
+                $close += 24; // buka melewati tengah malam
+            }
+            return [$open, $close];
+        }
+
+        return null;
     }
 
     public function show(string $slug): View

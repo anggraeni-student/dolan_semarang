@@ -32,8 +32,16 @@
                     <span class="material-icons" style="font-size:14px;vertical-align:-2px;color:var(--primary)">volunteer_activism</span>
                     Ditambahkan oleh kontributor
                     <a href="{{ route('profiles.show', $destination->creator->username) }}" style="font-weight:700;color:var(--ink)">{{ $destination->creator->name }}</a>
+                    <x-admin-badge :user="$destination->creator" />
                 </div>
             @endif
+            @auth
+                @if (($destination->authorId() ?? null) !== auth()->id())
+                    <div style="margin-top:10px">
+                        <x-report-button :model="$destination" />
+                    </div>
+                @endif
+            @endauth
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
                 @auth
                     <a href="{{ route('reviews.create', $destination->slug) }}" class="btn btn-primary">✍ Tulis Review</a>

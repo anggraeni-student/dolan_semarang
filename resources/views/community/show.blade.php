@@ -17,13 +17,19 @@
 
             {{-- Kartu thread --}}
             <div class="card" style="padding:18px 20px">
-                <span class="tag" style="font-size:10px;letter-spacing:.6px">{{ $thread->type === 'tanya' ? 'TANYA DESTINASI' : 'CERITA PERJALANAN' }}</span>
+                <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+                    <span class="tag" style="font-size:10px;letter-spacing:.6px">{{ $thread->type === 'tanya' ? 'TANYA DESTINASI' : 'CERITA PERJALANAN' }}</span>
+                    @auth
+                        <span style="margin-left:auto"><x-report-button :model="$thread" /></span>
+                    @endauth
+                </div>
                 <h1 style="font-weight:800;font-size:22px;line-height:1.35;margin:10px 0 12px">{{ $thread->title }}</h1>
                 <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);flex-wrap:wrap">
                     <a href="{{ route('profiles.show', $thread->user->username) }}" class="avatar" style="width:30px;height:30px;font-size:11px" title="Lihat profil {{ $thread->user->name }}">
                         {{ $thread->user->avatar_initials }}
                     </a>
                     <a href="{{ route('profiles.show', $thread->user->username) }}" style="font-weight:700;color:var(--ink-mid)">{{ $thread->user->name }}</a>
+                    <x-admin-badge :user="$thread->user" />
                     · {{ $thread->created_at->translatedFormat('d M Y') }}
                     · {{ $thread->replies->count() ?? $thread->reply_count }} balasan
                 </div>
@@ -45,7 +51,11 @@
                     <div style="min-width:0;flex:1">
                         <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
                             <a href="{{ route('profiles.show', $reply->user->username) }}" style="font-weight:700;font-size:13.5px;color:var(--ink)">{{ $reply->user->name }}</a>
+                            <x-admin-badge :user="$reply->user" />
                             <span class="card-meta">{{ $reply->created_at->diffForHumans() }}</span>
+                            @auth
+                                <span style="margin-left:auto"><x-report-button :model="$reply" /></span>
+                            @endauth
                         </div>
                         <p style="font-size:14px;color:var(--ink-mid);line-height:1.6;margin:6px 0 0;white-space:pre-line">{{ $reply->body }}</p>
                     </div>
