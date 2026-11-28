@@ -9,9 +9,6 @@
         <p style="color:var(--ink-mid);max-width:560px">Review jujur dari warga — temukan tempat asyik berikutnya di Semarang & sekitarnya, baca pengalaman asli, lalu bagikan ceritamu.</p>
     </div>
 
-    {{-- Filter Semarang --}}
-    <x-semarang-filters />
-
     {{-- Rekomendasi personal (kalau user punya minat) --}}
     @if ($forYou && $forYou->isNotEmpty())
         <div class="section" style="margin-top:20px">
@@ -30,20 +27,13 @@
     {{-- Grid utama --}}
     <div class="section">
         <div class="section-title">
-<<<<<<< HEAD
             <h2>Tempat Populer</h2>
             <a class="see-all" href="{{ route('destinations.index') }}">Lihat semua ›</a>
-=======
-            <h2>{{ request()->anyFilled(['budget', 'area', 'best_time']) ? 'Hasil Filter Tempat' : 'Tempat Populer' }}</h2>
-            <a class="see-all" href="{{ route('categories.show', 'kuliner') }}">Lihat semua ›</a>
->>>>>>> d86df827b9e5ffa48123c8563af38becbc92aa26
         </div>
         <div class="grid-cards">
-            @forelse ($destinations as $destination)
+            @foreach ($destinations as $destination)
                 <x-destination-card :destination="$destination" />
-            @empty
-                <p style="color:var(--ink-mid);grid-column:1/-1">Belum ada tempat yang cocok dengan filter tersebut. Coba ubah pilihan atau klik Reset Filter.</p>
-            @endforelse
+            @endforeach
         </div>
     </div>
 

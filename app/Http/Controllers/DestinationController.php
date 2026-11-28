@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Destination;
 use App\Models\Review;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-<<<<<<< HEAD
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -105,74 +105,27 @@ class DestinationController extends Controller
         $destination = Destination::with('category', 'reviews.user', 'creator')
             ->where('slug', $slug)
             ->firstOrFail();
-=======
 
-class DestinationController extends Controller
-{
-    public array $budgetOptions = [
-        'Gratis / Parkir Aja',
-        'Di Bawah Rp 25.000',
-        'Rp 25.000 – Rp 75.000',
-        'Di Atas Rp 75.000',
-    ];
+        $reviews = $destination->reviews()
+            ->with('user')
+            ->orderByDesc('helpful_count')
+            ->get();
 
-    public array $areaOptions = [
-        'Semarang Tengah / Kota Lama',
-        'Semarang Barat',
-        'Banyumanik / Tembalang',
-        'Semarang Selatan / Gombel',
-        'Ungaran / Bandungan / Sekitarnya',
-    ];
+        // distribusi bintang utk panel ringkasan
+        $dist = collect(range(5, 1))->mapWithKeys(function ($star) use ($reviews) {
+            $count = $reviews->filter(fn ($r) => $r->score == $star)->count();
+            return [$star => $count];
+        });
 
-    public array $timeOptions = [
-        'Pagi / Sunrise',
-        'Sore / Sunset',
-        'Malam / Kulineran',
-        'Anti-Hujan / Indoor',
-    ];
-
-    public function index(Request $request)
-    {
-        $query = Destination::with('reviews');
->>>>>>> d86df827b9e5ffa48123c8563af38becbc92aa26
-
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'ilike', '%' . $request->search . '%')
-                  ->orWhere('address', 'ilike', '%' . $request->search . '%')
-                  ->orWhere('description', 'ilike', '%' . $request->search . '%');
-            });
-        }
-
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
-        }
-
-        if ($request->filled('budget')) {
-            $query->where('budget_tier', $request->budget);
-        }
-
-        if ($request->filled('area')) {
-            $query->where('area', $request->area);
-        }
-
-        if ($request->filled('waktu')) {
-            $query->where('best_time', $request->waktu);
-        }
-
-        $destinations = $query->latest()->get();
-        $popularDestinations = Destination::with('reviews')->take(4)->get();
-
-        return view('home', [
-            'destinations' => $destinations,
-            'popularDestinations' => $popularDestinations,
-            'budgetOptions' => $this->budgetOptions,
-            'areaOptions' => $this->areaOptions,
-            'timeOptions' => $this->timeOptions,
+        return view('destinations.show', [
+            'destination' => $destination,
+            'categories' => Category::orderBy('position')->get(),
+            'reviews' => $reviews,
+            'dist' => $dist,
+            'topReviews' => $reviews->take(2),
         ]);
     }
 
-<<<<<<< HEAD
     /** Form tambah destinasi oleh user (komunitas, bukan hanya admin) */
     public function create(): View
     {
@@ -250,43 +203,3 @@ class DestinationController extends Controller
         return array_map(fn ($path) => basename($path), $files);
     }
 }
-=======
-    public function show($slugOrId)
-    {
-        $destination = Destination::with(['reviews' => function ($q) {
-            $q->latest();
-        }])
-            ->where('slug', $slugOrId)
-            ->orWhere('id', is_numeric($slugOrId) ? (int) $slugOrId : 0)
-            ->firstOrFail();
-
-        $avgRating = $destination->reviews->avg('rating') ?? 0;
-
-        return view('destinasi.show', [
-            'destination' => $destination,
-            'avgRating' => $avgRating,
-            'timeOptions' => $this->timeOptions,
-        ]);
-    }
-
-    public function storeReview(Request $request, $slugOrId)
-    {
-        $destination = Destination::where('slug', $slugOrId)
-            ->orWhere('id', is_numeric($slugOrId) ? (int) $slugOrId : 0)
-            ->firstOrFail();
-
-        $validated = $request->validate([
-            'user_name' => 'required|string|max:100',
-            'rating' => 'required|integer|min:1|max:5',
-            'visit_time_tag' => 'nullable|string|max:100',
-            'comment' => 'required|string',
-            'photo_url' => 'nullable|url',
-        ]);
-
-        $validated['destination_id'] = $destination->id;
-        Review::create($validated);
-
-        return back()->with('success', 'Ulasanmu berhasil dikirim!');
-    }
-}
->>>>>>> d86df827b9e5ffa48123c8563af38becbc92aa26
