@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Destination extends Model
 {
     protected $fillable = [
         'slug', 'name', 'category_id', 'location', 'description', 'hero_image',
         'lat', 'lng', 'htm', 'opening_hours', 'best_time', 'access_info', 'is_featured',
+        'created_by',
     ];
 
     protected $casts = [
@@ -24,6 +26,24 @@ class Destination extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** User (kontributor komunitas) yang menambahkan tempat ini */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /** Laporan untuk destinasi ini */
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Report::class, 'reportable');
+    }
+
+    /** ID penulis konten (target peringatan moderator) */
+    public function authorId(): ?int
+    {
+        return $this->created_by;
     }
 
     public function reviews(): HasMany

@@ -4,36 +4,23 @@
 @section('content')
     <div class="crumb">
         <a href="{{ route('home') }}">Home</a> /
-        <a href="{{ route('categories.show', 'kuliner') }}">Tempat</a> /
+        <a href="{{ route('destinations.index') }}">Tempat</a> /
         {{ $category->name }}
     </div>
 
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px">
-        <h1 style="margin:0">Kategori: {{ $category->name }}</h1>
+        <h1 style="margin:0">{{ $category->name }}</h1>
         <div style="font-size:13px;color:var(--ink-mid)"><b style="color:var(--ink)">{{ $destinations->count() }}</b> tempat · diurutkan dari rating tertinggi</div>
     </div>
 
-    {{-- Filter chips (sub-kategori seperti prototype) --}}
-    @php
-        $filters = [
-            'kuliner' => 'Kuliner',
-            'sejarah' => 'Sejarah & Budaya',
-            'nongkrong' => 'Nongkrong',
-            'kafe' => 'Kafe & Kedai',
-            'alam' => 'Alam & Bukit',
-        ];
-    @endphp
-    <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap">
-        <a href="{{ route('categories.show', $category->slug) }}"
-           class="cat-chip {{ $activeFilter ? '' : 'active' }}">Semua</a>
-        @foreach ($filters as $filterSlug => $filterLabel)
-            <a href="{{ route('categories.show', $category->slug) }}?filter={{ $filterSlug }}"
-               class="cat-chip {{ $activeFilter === $filterSlug ? 'active' : '' }}">{{ $filterLabel }}</a>
-        @endforeach
-        <span class="material-icons" style="font-size:17px;color:var(--ink-soft);margin-left:4px">tune</span>
+    <div style="font-size:13px;color:var(--ink-mid);margin-top:6px">
+        Ingin ganti kategori? Pakai strip kategori di atas —
+        <a href="{{ route('destinations.index') }}" style="color:var(--primary);font-weight:700">atau lihat semua destinasi ›</a>
     </div>
 
-    {{-- Grid destinasi --}}
+    {{-- Grid destinasi. Filter kategori cukup SEKALI lewat strip di atas:
+         halaman ini memang sudah difilter per kategori, jadi tidak ada
+         lagi chips filter kedua di bawah judul. --}}
     @forelse ($destinations as $destination)
         @if ($loop->first)
             <div class="grid-cards" style="margin-top:18px">
@@ -46,7 +33,7 @@
         <div class="empty-state" style="margin-top:18px">
             <span class="material-icons" style="font-size:40px;color:var(--ink-soft)">explore_off</span>
             <p style="margin-top:8px">Belum ada tempat di kategori ini.</p>
-            <a href="{{ route('categories.show', 'kuliner') }}" class="btn btn-outline">Lihat kategori lain</a>
+            <a href="{{ route('destinations.index') }}" class="btn btn-outline">Lihat semua destinasi</a>
         </div>
     @endforelse
 @endsection

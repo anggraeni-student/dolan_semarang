@@ -69,7 +69,6 @@ class ArticleResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_featured')->label('Unggulan'),
             ])
             ->actions([
-                Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -85,7 +84,6 @@ class ArticleResource extends Resource
         return [
             'index' => Pages\ListArticles::route('/'),
             'create' => Pages\CreateArticle::route('/create'),
-            'edit' => Pages\EditArticle::route('/{record}/edit'),
         ];
     }
 }

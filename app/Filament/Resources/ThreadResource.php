@@ -61,7 +61,6 @@ class ThreadResource extends Resource
                 Tables\Filters\SelectFilter::make('type')->label('Jenis')->options(['tanya' => 'Tanya', 'cerita' => 'Cerita']),
             ])
             ->actions([
-                Actions\EditAction::make(),
                 Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -77,7 +76,6 @@ class ThreadResource extends Resource
         return [
             'index' => Pages\ListThreads::route('/'),
             'create' => Pages\CreateThread::route('/create'),
-            'edit' => Pages\EditThread::route('/{record}/edit'),
         ];
     }
 }

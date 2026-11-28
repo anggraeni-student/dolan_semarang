@@ -7,6 +7,7 @@
         <div>
             <div style="font-weight:700;font-size:13.5px">
                 <a href="{{ route('profiles.show', $review->user->username) }}" style="color:var(--ink)">{{ $review->user->name }}</a>
+                <x-admin-badge :user="$review->user" />
                 @if ($review->user->badge['name'] === 'Legenda Dolan')
                     <span class="badge-lime" style="margin-left:6px">{{ $review->user->badge['name'] }}</span>
                 @endif
@@ -18,11 +19,16 @@
         </div>
     </div>
     <p style="font-size:14px;color:var(--ink-mid);margin:0 0 8px">{{ $review->body }}</p>
-    <div class="card-meta">
-        <span class="material-icons" style="font-size:13px;vertical-align:-2px;color:var(--primary)">thumb_up</span>
-        <b style="color:var(--ink)">{{ $review->helpful_count }}</b> terbantu
+    <div class="card-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:5px">
+            <span class="material-icons" style="font-size:13px;vertical-align:-2px;color:var(--primary)">thumb_up</span>
+            <b style="color:var(--ink)">{{ $review->helpful_count }}</b> terbantu
+        </span>
         @if ($review->photo_count)
-            · {{ $review->photo_count }} foto
+            <span>· {{ $review->photo_count }} foto</span>
         @endif
+        <span style="margin-left:auto">
+            <x-report-button :model="$review" />
+        </span>
     </div>
 </div>

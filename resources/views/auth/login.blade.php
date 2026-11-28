@@ -26,9 +26,12 @@
             <label class="label" for="password">Password</label>
             <input id="password" type="password" name="password" class="input" required>
 
-            <label style="display:flex;align-items:center;gap:8px;margin:14px 0;font-size:13.5px;color:var(--ink-mid)">
-                <input type="checkbox" name="remember" value="1" style="accent-color:var(--primary)"> Ingat saya
-            </label>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-mid)">
+                    <input type="checkbox" name="remember" value="1" style="accent-color:var(--primary)"> Ingat saya
+                </label>
+                <a href="{{ route('password.request') }}" style="font-size:13px;font-weight:700;color:var(--primary)">Lupa password?</a>
+            </div>
 
             <button type="submit" class="btn btn-primary" style="width:100%">Masuk</button>
         </form>
